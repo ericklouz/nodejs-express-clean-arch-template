@@ -1,0 +1,347 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["common", "public", "users"]
+}
+
+model branches {
+  id                                     BigInt    @id @default(autoincrement())
+  name                                   String    @db.VarChar(255)
+  created_by                             BigInt
+  created_at                             DateTime  @default(now()) @db.Timestamp(6)
+  last_modified_by                       BigInt?
+  last_modified_at                       DateTime? @db.Timestamp(6)
+  enable                                 Boolean   @default(true)
+  users_branches_created_byTousers       users     @relation("branches_created_byTousers", fields: [created_by], references: [id], onDelete: Cascade, map: "created_by_fk")
+  users_branches_last_modified_byTousers users?    @relation("branches_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: Cascade, map: "last_modified_by_fk")
+  users_users_branch_idTobranches        users[]   @relation("users_branch_idTobranches")
+
+  @@schema("common")
+}
+
+model access_types {
+  id                                         BigInt    @id @default(autoincrement())
+  name                                       String    @unique @db.VarChar(120)
+  description                                String?   @db.VarChar(255)
+  created_by                                 BigInt
+  created_at                                 DateTime  @default(now()) @db.Timestamp(6)
+  last_modified_by                           BigInt?
+  last_modified_at                           DateTime? @db.Timestamp(6)
+  enable                                     Boolean   @default(true)
+  users_access_types_created_byTousers       users     @relation("access_types_created_byTousers", fields: [created_by], references: [id], onDelete: Cascade, map: "created_by_fk")
+  users_access_types_last_modified_byTousers users?    @relation("access_types_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: Cascade, map: "last_modified_by_fk")
+  users_users_access_type_idToaccess_types   users[]   @relation("users_access_type_idToaccess_types")
+
+  @@schema("users")
+}
+
+model actions {
+  id                                    BigInt          @id @default(autoincrement())
+  name                                  String          @unique @db.VarChar(120)
+  description                           String?         @db.VarChar(255)
+  module_id                             BigInt
+  created_by                            BigInt
+  created_at                            DateTime        @default(now()) @db.Timestamp(6)
+  last_modified_by                      BigInt?
+  last_modified_at                      DateTime?       @db.Timestamp(6)
+  enable                                Boolean         @default(true)
+  users_actions_created_byTousers       users           @relation("actions_created_byTousers", fields: [created_by], references: [id], onDelete: Cascade, map: "created_by_fk")
+  users_actions_last_modified_byTousers users?          @relation("actions_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: Cascade, map: "last_modified_by_fk")
+  modules                               modules         @relation(fields: [module_id], references: [id], onDelete: Cascade, map: "module_id_fk")
+  roles_actions                         roles_actions[]
+
+  @@schema("users")
+}
+
+model customer_types {
+  id               BigInt    @id @default(autoincrement())
+  name             String    @db.VarChar(120)
+  description      String?   @db.VarChar(255)
+  created_by       BigInt
+  created_at       DateTime  @default(now()) @db.Timestamp(6)
+  last_modified_by BigInt?
+  last_modified_at DateTime? @db.Timestamp(6)
+  enable           Boolean   @default(true)
+  users            users[]
+
+  @@schema("users")
+}
+
+model documentations {
+  id                                           BigInt    @id @default(autoincrement())
+  user_id                                      BigInt
+  ine_identification_number                    String?   @db.VarChar(120)
+  ine_frontal_photo                            String?   @db.VarChar(120)
+  ine_rear_photo                               String?   @db.VarChar(120)
+  curp                                         String?   @unique @db.VarChar(120)
+  rfc                                          String?   @unique @db.VarChar(120)
+  driver_license_number                        String?   @db.VarChar(120)
+  driver_license_expiration_date               DateTime? @db.Date
+  driver_license_photo                         String?   @db.VarChar(120)
+  created_by                                   BigInt
+  created_at                                   DateTime  @default(now()) @db.Timestamp(6)
+  last_modified_by                             BigInt?
+  last_modified_at                             DateTime? @db.Timestamp(6)
+  enable                                       Boolean   @default(true)
+  users_documentations_created_byTousers       users     @relation("documentations_created_byTousers", fields: [created_by], references: [id], onDelete: Cascade, map: "created_by_fk")
+  users_documentations_last_modified_byTousers users?    @relation("documentations_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: Cascade, map: "last_modified_by_fk")
+  users_documentations_user_idTousers          users     @relation("documentations_user_idTousers", fields: [user_id], references: [id], onDelete: Cascade, map: "user_id_fk")
+
+  @@schema("users")
+}
+
+model drivers {
+  id                                    BigInt    @id @default(autoincrement())
+  driver_id                             BigInt
+  customer_id                           BigInt
+  created_by                            BigInt
+  created_at                            DateTime  @default(now()) @db.Timestamp(6)
+  last_modified_by                      BigInt?
+  last_modified_at                      DateTime? @db.Timestamp(6)
+  enable                                Boolean   @default(true)
+  users_drivers_created_byTousers       users     @relation("drivers_created_byTousers", fields: [created_by], references: [id], onDelete: Cascade, map: "created_by_fk")
+  users_drivers_customer_idTousers      users     @relation("drivers_customer_idTousers", fields: [customer_id], references: [id], onDelete: Cascade, map: "customer_id_fk")
+  users_drivers_driver_idTousers        users     @relation("drivers_driver_idTousers", fields: [driver_id], references: [id], onDelete: Cascade, map: "driver_id_fk")
+  users_drivers_last_modified_byTousers users?    @relation("drivers_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: Cascade, map: "last_modified_by_fk")
+
+  @@schema("users")
+}
+
+model environments {
+  id                                         BigInt    @id @default(autoincrement())
+  name                                       String    @unique @db.VarChar(120)
+  description                                String?   @db.VarChar(255)
+  created_by                                 BigInt
+  created_at                                 DateTime  @default(now()) @db.Timestamp(6)
+  last_modified_by                           BigInt?
+  last_modified_at                           DateTime? @db.Timestamp(6)
+  enable                                     Boolean   @default(true)
+  users_environments_created_byTousers       users     @relation("environments_created_byTousers", fields: [created_by], references: [id], onDelete: Cascade, map: "created_by_fk")
+  users_environments_last_modified_byTousers users?    @relation("environments_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: Cascade, map: "last_modified_by_fk")
+  users_users_environment_idToenvironments   users[]   @relation("users_environment_idToenvironments")
+
+  @@schema("users")
+}
+
+model gender_types {
+  id                                         BigInt    @id @default(autoincrement())
+  name                                       String    @unique @db.VarChar(120)
+  description                                String?   @db.VarChar(255)
+  created_by                                 BigInt
+  created_at                                 DateTime  @default(now()) @db.Timestamp(6)
+  last_modified_by                           BigInt?
+  last_modified_at                           DateTime? @db.Timestamp(6)
+  enable                                     Boolean   @default(true)
+  users_gender_types_created_byTousers       users     @relation("gender_types_created_byTousers", fields: [created_by], references: [id], onDelete: Cascade, map: "created_by_fk")
+  users_gender_types_last_modified_byTousers users?    @relation("gender_types_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: Cascade, map: "last_modified_by_fk")
+  users_users_gender_type_idTogender_types   users[]   @relation("users_gender_type_idTogender_types")
+
+  @@schema("users")
+}
+
+model modules {
+  id                                    BigInt    @id @default(autoincrement())
+  name                                  String    @unique @db.VarChar(120)
+  description                           String?   @db.VarChar(255)
+  created_by                            BigInt
+  created_at                            DateTime  @default(now()) @db.Timestamp(6)
+  last_modified_by                      BigInt?
+  last_modified_at                      DateTime? @db.Timestamp(6)
+  enable                                Boolean   @default(true)
+  actions                               actions[]
+  users_modules_created_byTousers       users     @relation("modules_created_byTousers", fields: [created_by], references: [id], onDelete: Cascade, map: "created_by_fk")
+  users_modules_last_modified_byTousers users?    @relation("modules_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: Cascade, map: "last_modified_by_fk")
+
+  @@schema("users")
+}
+
+model roles {
+  id                                  BigInt          @id @default(autoincrement())
+  name                                String          @unique @db.VarChar(120)
+  abbreviation                        String?         @db.VarChar(120)
+  description                         String?         @db.VarChar(255)
+  image_url                           String?         @db.VarChar(120)
+  created_by                          BigInt
+  created_at                          DateTime        @default(now()) @db.Timestamp(6)
+  last_modified_by                    BigInt?
+  last_modified_at                    DateTime?       @db.Timestamp(6)
+  enable                              Boolean         @default(true)
+  users_roles_created_byTousers       users           @relation("roles_created_byTousers", fields: [created_by], references: [id], onDelete: Cascade, map: "created_by_fk")
+  users_roles_last_modified_byTousers users?          @relation("roles_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: Cascade, map: "last_modified_by_fk")
+  roles_actions                       roles_actions[]
+  users_roles                         users_roles[]
+
+  @@schema("users")
+}
+
+model roles_actions {
+  id                                          BigInt    @id @default(autoincrement())
+  role_id                                     BigInt
+  action_id                                   BigInt
+  created_by                                  BigInt
+  created_at                                  DateTime  @default(now()) @db.Timestamp(6)
+  last_modified_by                            BigInt?
+  last_modified_at                            DateTime? @db.Timestamp(6)
+  enable                                      Boolean   @default(true)
+  actions                                     actions   @relation(fields: [action_id], references: [id], onDelete: Cascade, map: "action_id_fk")
+  users_roles_actions_created_byTousers       users     @relation("roles_actions_created_byTousers", fields: [created_by], references: [id], onDelete: Cascade, map: "created_by_fk")
+  users_roles_actions_last_modified_byTousers users?    @relation("roles_actions_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: Cascade, map: "last_modified_by_fk")
+  roles                                       roles     @relation(fields: [role_id], references: [id], onDelete: Cascade, map: "role_id_fk")
+
+  @@schema("users")
+}
+
+model session_tokens {
+  id                            BigInt   @id @default(autoincrement())
+  user_id                       BigInt
+  refresh_token                 String
+  refresh_token_expiration_date DateTime @db.Timestamp(6)
+  ip_address                    String   @db.VarChar(45)
+  device_info                   String
+  city                          String?  @db.VarChar(255)
+  region                        String?  @db.VarChar(255)
+  country                       String?  @db.VarChar(255)
+  created_at                    DateTime @default(now()) @db.Timestamp(6)
+  enable                        Boolean  @default(true)
+  users                         users    @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "user_id_fk")
+
+  @@schema("users")
+}
+
+model statuses {
+  id                                     BigInt    @id @default(autoincrement())
+  name                                   String    @unique @db.VarChar(120)
+  description                            String?   @db.VarChar(255)
+  hexadecimal_color                      String?   @db.VarChar(60)
+  created_by                             BigInt
+  created_at                             DateTime  @default(now()) @db.Timestamp(6)
+  last_modified_by                       BigInt?
+  last_modified_at                       DateTime? @db.Timestamp(6)
+  enable                                 Boolean   @default(true)
+  users_statuses_created_byTousers       users     @relation("statuses_created_byTousers", fields: [created_by], references: [id], onDelete: Cascade, map: "created_by_fk")
+  users_statuses_last_modified_byTousers users?    @relation("statuses_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: Cascade, map: "last_modified_by_fk")
+  users_users_status_idTostatuses        users[]   @relation("users_status_idTostatuses")
+
+  @@schema("users")
+}
+
+model types {
+  id               BigInt    @id @default(autoincrement())
+  name             String    @db.VarChar(120)
+  description      String?   @db.VarChar(255)
+  created_by       BigInt
+  created_at       DateTime  @default(now()) @db.Timestamp(6)
+  last_modified_by BigInt?
+  last_modified_at DateTime? @db.Timestamp(6)
+  enable           Boolean   @default(true)
+  users            users[]
+
+  @@schema("users")
+}
+
+model users {
+  id                                                    BigInt           @id @default(autoincrement())
+  names                                                 String           @db.VarChar(255)
+  paternal_surname                                      String?          @db.VarChar(255)
+  maternal_surname                                      String?          @db.VarChar(255)
+  email                                                 String           @unique
+  password                                              String?
+  password_change_token                                 String?
+  password_change_token_expiration_date                 DateTime?        @db.Timestamp(6)
+  date_of_birth                                         DateTime?        @db.Date
+  photo_url                                             String?
+  cell_phone_number                                     String           @db.VarChar(120)
+  landline_phone_number                                 String?          @db.VarChar(120)
+  gender_type_id                                        BigInt           @default(3)
+  environment_id                                        BigInt
+  access_type_id                                        BigInt
+  type_id                                               BigInt
+  customer_type_id                                      BigInt?
+  branch_id                                             BigInt
+  status_id                                             BigInt
+  created_by                                            BigInt
+  created_at                                            DateTime         @default(now()) @db.Timestamp(6)
+  last_modified_by                                      BigInt?
+  last_modified_at                                      DateTime?        @db.Timestamp(6)
+  enable                                                Boolean          @default(true)
+  branches_branches_created_byTousers                   branches[]       @relation("branches_created_byTousers")
+  branches_branches_last_modified_byTousers             branches[]       @relation("branches_last_modified_byTousers")
+  access_types_access_types_created_byTousers           access_types[]   @relation("access_types_created_byTousers")
+  access_types_access_types_last_modified_byTousers     access_types[]   @relation("access_types_last_modified_byTousers")
+  actions_actions_created_byTousers                     actions[]        @relation("actions_created_byTousers")
+  actions_actions_last_modified_byTousers               actions[]        @relation("actions_last_modified_byTousers")
+  documentations_documentations_created_byTousers       documentations[] @relation("documentations_created_byTousers")
+  documentations_documentations_last_modified_byTousers documentations[] @relation("documentations_last_modified_byTousers")
+  documentations_documentations_user_idTousers          documentations[] @relation("documentations_user_idTousers")
+  drivers_drivers_created_byTousers                     drivers[]        @relation("drivers_created_byTousers")
+  drivers_drivers_customer_idTousers                    drivers[]        @relation("drivers_customer_idTousers")
+  drivers_drivers_driver_idTousers                      drivers[]        @relation("drivers_driver_idTousers")
+  drivers_drivers_last_modified_byTousers               drivers[]        @relation("drivers_last_modified_byTousers")
+  environments_environments_created_byTousers           environments[]   @relation("environments_created_byTousers")
+  environments_environments_last_modified_byTousers     environments[]   @relation("environments_last_modified_byTousers")
+  gender_types_gender_types_created_byTousers           gender_types[]   @relation("gender_types_created_byTousers")
+  gender_types_gender_types_last_modified_byTousers     gender_types[]   @relation("gender_types_last_modified_byTousers")
+  login_history                                         login_history[]
+  modules_modules_created_byTousers                     modules[]        @relation("modules_created_byTousers")
+  modules_modules_last_modified_byTousers               modules[]        @relation("modules_last_modified_byTousers")
+  roles_roles_created_byTousers                         roles[]          @relation("roles_created_byTousers")
+  roles_roles_last_modified_byTousers                   roles[]          @relation("roles_last_modified_byTousers")
+  roles_actions_roles_actions_created_byTousers         roles_actions[]  @relation("roles_actions_created_byTousers")
+  roles_actions_roles_actions_last_modified_byTousers   roles_actions[]  @relation("roles_actions_last_modified_byTousers")
+  session_tokens                                        session_tokens[]
+  statuses_statuses_created_byTousers                   statuses[]       @relation("statuses_created_byTousers")
+  statuses_statuses_last_modified_byTousers             statuses[]       @relation("statuses_last_modified_byTousers")
+  access_types_users_access_type_idToaccess_types       access_types     @relation("users_access_type_idToaccess_types", fields: [access_type_id], references: [id], onDelete: Cascade, map: "access_type_id_fk")
+  branches_users_branch_idTobranches                    branches         @relation("users_branch_idTobranches", fields: [branch_id], references: [id], onDelete: Cascade, map: "branch_id_fk")
+  users_users_created_byTousers                         users            @relation("users_created_byTousers", fields: [created_by], references: [id], onDelete: Cascade, map: "created_by_fk")
+  other_users_users_created_byTousers                   users[]          @relation("users_created_byTousers")
+  customer_types                                        customer_types?  @relation(fields: [customer_type_id], references: [id], onDelete: Cascade, map: "customer_type_id_fk")
+  environments_users_environment_idToenvironments       environments     @relation("users_environment_idToenvironments", fields: [environment_id], references: [id], onDelete: Cascade, map: "environment_id_fk")
+  gender_types_users_gender_type_idTogender_types       gender_types     @relation("users_gender_type_idTogender_types", fields: [gender_type_id], references: [id], onDelete: Cascade, map: "gender_type_id_fk")
+  users_users_last_modified_byTousers                   users?           @relation("users_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: Cascade, map: "last_modified_by_fk")
+  other_users_users_last_modified_byTousers             users[]          @relation("users_last_modified_byTousers")
+  statuses_users_status_idTostatuses                    statuses         @relation("users_status_idTostatuses", fields: [status_id], references: [id], onDelete: Cascade, map: "status_id_fk")
+  types                                                 types            @relation(fields: [type_id], references: [id], onDelete: Cascade, map: "type_id_fk")
+  users_roles_users_roles_created_byTousers             users_roles[]    @relation("users_roles_created_byTousers")
+  users_roles_users_roles_last_modified_byTousers       users_roles[]    @relation("users_roles_last_modified_byTousers")
+  users_roles_users_roles_user_idTousers                users_roles[]    @relation("users_roles_user_idTousers")
+
+  @@schema("users")
+}
+
+model users_roles {
+  id                                        BigInt    @id @default(autoincrement())
+  user_id                                   BigInt
+  role_id                                   BigInt
+  created_by                                BigInt
+  created_at                                DateTime  @default(now()) @db.Timestamp(6)
+  last_modified_by                          BigInt?
+  last_modified_at                          DateTime? @db.Timestamp(6)
+  enable                                    Boolean   @default(true)
+  users_users_roles_created_byTousers       users     @relation("users_roles_created_byTousers", fields: [created_by], references: [id], onDelete: Cascade, map: "created_by_fk")
+  users_users_roles_last_modified_byTousers users?    @relation("users_roles_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: Cascade, map: "last_modified_by_fk")
+  roles                                     roles     @relation(fields: [role_id], references: [id], onDelete: Cascade, map: "role_id_fk")
+  users_users_roles_user_idTousers          users     @relation("users_roles_user_idTousers", fields: [user_id], references: [id], onDelete: Cascade, map: "user_id_fk")
+
+  @@schema("users")
+}
+
+model login_history {
+  id          BigInt   @id @default(autoincrement())
+  user_id     BigInt
+  ip_address  String   @db.VarChar(45)
+  device_info String
+  city        String?  @db.VarChar(255)
+  region      String?  @db.VarChar(255)
+  country     String?  @db.VarChar(255)
+  action      String   @default("LOGIN") @db.VarChar(40)
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  users       users    @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "user_id_fk")
+
+  @@schema("users")
+}
